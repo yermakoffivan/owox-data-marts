@@ -4,7 +4,6 @@ import { BusinessViolationException } from '../../common/exceptions/business-vio
 import { TypeResolver } from '../../common/resolver/type-resolver';
 import { GracefulShutdownService } from '../../common/scheduler/services/graceful-shutdown.service';
 import { SystemTimeService } from '../../common/scheduler/services/system-time.service';
-import { AvailableDestinationTypesService } from '../data-destination-types/available-destination-types.service';
 import { DATA_DESTINATION_REPORT_WRITER_RESOLVER } from '../data-destination-types/data-destination-providers';
 import {
   DataDestinationType,
@@ -113,7 +112,6 @@ export class RunReportService {
     private readonly gracefulShutdownService: GracefulShutdownService,
     private readonly systemTimeService: SystemTimeService,
     private readonly reportRunService: ReportRunService,
-    private readonly availableDestinationTypesService: AvailableDestinationTypesService,
     private readonly projectBillingService: ProjectBillingService,
     private readonly reportExecutionPolicyResolver: ReportExecutionPolicyResolver,
     private readonly reportRunTriggerService: ReportRunTriggerService,
@@ -384,9 +382,6 @@ export class RunReportService {
     try {
       this.gracefulShutdownService.registerActiveProcess(processId);
       const accessor = await this.resolveAccessor(runByUserId, reportRun.getDataMart().projectId);
-      this.availableDestinationTypesService.verifyIsAllowed(
-        reportRun.getReport().dataDestination.type
-      );
       await this.actualizeSchemaInDataMart(reportRun.getDataMart());
       await this.reportRunService.markAsStarted(reportRun);
       this.logger.log(`Report ${reportRun.getReportId()} execution started`);
