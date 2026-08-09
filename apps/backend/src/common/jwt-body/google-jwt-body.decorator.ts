@@ -4,14 +4,16 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
+import { fetchWithBackoff } from '@owox/internal-helpers';
 import { createPublicKey } from 'crypto';
 import * as jwt from 'jsonwebtoken';
 
 /**
  * JWT payload structure for Google Service Account tokens
  */
-interface JwtPayload {
+export interface JwtPayload {
   iss: string;
+  jti?: string;
   payload: unknown;
   [key: string]: unknown;
 }
@@ -68,6 +70,19 @@ export async function validateJwt(
   expectedServiceAccount: string,
   audience?: string
 ): Promise<unknown> {
+  const claims = await verifyJwtClaims(token, expectedServiceAccount, audience);
+  return claims.payload;
+}
+
+/**
+ * Same verification as {@link validateJwt}, but returns the full set of verified
+ * claims instead of only the nested `payload` object.
+ */
+export async function verifyJwtClaims(
+  token: string,
+  expectedServiceAccount: string,
+  audience?: string
+): Promise<JwtPayload> {
   try {
     await ensureCertsCache(expectedServiceAccount);
 
@@ -84,7 +99,7 @@ export async function validateJwt(
 
     const payload = jwt.verify(token, publicKey, {
       algorithms: ['RS256'],
-      audience: audience,
+      audience,
     }) as JwtPayload;
 
     if (payload.iss !== expectedServiceAccount) {
@@ -93,7 +108,7 @@ export async function validateJwt(
       );
     }
 
-    return payload.payload;
+    return payload;
   } catch (error) {
     if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
       throw error;
@@ -116,7 +131,7 @@ async function ensureCertsCache(serviceAccountEmail: string): Promise<void> {
   try {
     const jwkUrl = `https://www.googleapis.com/service_accounts/v1/jwk/${serviceAccountEmail}`;
 
-    const response = await fetch(jwkUrl);
+    const response = await fetchWithBackoff(jwkUrl, { method: 'GET' });
     if (!response.ok) {
       throw new Error(`Failed to fetch service account JWK: ${response.status}`);
     }
