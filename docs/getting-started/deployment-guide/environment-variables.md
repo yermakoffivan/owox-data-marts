@@ -21,6 +21,8 @@ Depending on the selected database type for the backend (`DB_TYPE`) and identity
 
 - **For `DB_TYPE=mysql`** - add MySQL connection variables (`DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`)
 - **For `IDP_PROVIDER=better-auth`** - add Better Auth variables (`IDP_BETTER_AUTH_SECRET`, `IDP_BETTER_AUTH_BASE_URL`, etc.)
+- **For Report Run execution** - set `LICENSE_KEY` to a managed license key created in OWOX Data Marts Cloud (Project Settings → License keys) and bound to your `PUBLIC_ORIGIN`. Without a valid key the deployment runs as `COMMUNITY`: configuration stays fully available, but Report Runs finish as `RESTRICTED`
+- **For the Cloud deployment that issues license keys** - set `LICENSE_ISSUANCE_ENABLED=true` together with `LICENSE_SIGNING_SERVICE_ACCOUNT_KEY_JSON` (a user-managed key of the OWOX license service account, injected from the secret store) and the `BALANCE_ENDPOINT_*` variables. Self-managed deployments never set these
 
 The complete list of all available environment variables is located in the [.env.example](https://github.com/OWOX/owox-data-marts/blob/main/.env.example) file in the project root directory.
 

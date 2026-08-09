@@ -2,8 +2,8 @@
 
 This directory contains Enterprise Edition (EE) code and assets. Use of the code in this folder is restricted and requires:
 
-- An active, valid Enterprise Edition license;
-- A corresponding license key issued to you by the vendor.
+- An active managed `CLOUD_BILLED_ENTERPRISE` license key, created in OWOX Data Marts Cloud (Project Settings → License keys) and configured as `LICENSE_KEY`;
+- The key is bound to the deployment origin and authorizes Report Run execution through the OWOX Cloud license gateway. Legacy offline `ENTERPRISE` keys are not supported.
 
 ## Enforcement
 
